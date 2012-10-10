@@ -2,6 +2,8 @@ var run = require('comandante');
 var qs = require('querystring');
 var path = require('path');
 var mkdirp = require('mkdirp');
+var responseStream = require('response-stream');
+var through = require('through');
 
 module.exports = function (target, opts) {
     if (!opts) opts = {};
@@ -10,32 +12,41 @@ module.exports = function (target, opts) {
         + Math.random().toString(16).slice(2)
     );
     
-    var handle = function (req, res) {
-        if (req.method !== 'POST') return;
+    var data = '';
+    function write (buf) { data += buf }
+    
+    function end () {
+        try {
+            var params = qs.parse(data);
+            if (!params.payload) throw new Error('empty payload');
+            var payload = JSON.parse(params.payload);
+        }
+        catch (err) {
+            return this.emit('failure', err);
+        }
+        this.emit('payload', payload);
+    }
+    
+    var tr = through(write, end);
+    var rs = responseStream(tr);
+    rs.on('response', function (res) {
+        tr.on('failure', function (err) {
+            res.statusCode = 500;
+            res.end(String(err) + '\n');
+        });
         
-        var data = '';
-        req.on('data', function (buf) { data += buf });
-        req.on('end', function () {
-            try {
-                var params = qs.parse(data);
-                var payload = JSON.parse(params).payload;
-            }
-            catch (err) {
-                res.statusCode = 500;
-                res.end(err);
-                return;
-            }
-            
+        tr.on('payload', function (payload) {
             clonePush(dir, target, payload, function (err) {
-                if (err) handle.emit('error', err)
-                else handle.emit('payload', payload)
+                if (err) {
+                    res.statusCode = 500;
+                    res.end(String(err) + '\n');
+                }
+                else res.end('ok\n')
             });
         });
-    };
+    });
     
-    handle.on('error', function () {});
-    
-    return handle;
+    return rs;
 };
 
 function clonePush (basedir, target, payload, cb) {
