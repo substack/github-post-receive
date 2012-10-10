@@ -8,12 +8,12 @@ Issue a `git push` in response to a
 First whip up an http server to listen for the github payloads:
 
 ``` js
-var pushReceive = require('github-push-receive')('http://localhost:8051');
+var pushReceive = require('github-push-receive');
 var http = require('http');
 
 var server = http.createServer(function (req, res) {
     if (req.url.split('/')[1] === 'hook') {
-        pushReceive(req, res);
+        req.pipe(pushReceive('http://localhost:8051')).pipe(res);
     }
     else res.end('beep boop\n');
 });

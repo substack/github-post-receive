@@ -1,0 +1,43 @@
+{
+    "name" : "github-push-receive",
+    "version" : "0.0.0",
+    "description" : "issue a `git push` in response to a github post-receive hook payload",
+    "main" : "index.js",
+    "bin" : {},
+    "directories" : {
+        "example" : "example",
+        "test" : "test"
+    },
+    "dependencies" : {
+        "comandante" : "~0.0.1",
+        "mkdirp" : "~0.3.4",
+        "response-stream" : "~0.0.0",
+        "through" : "~1.1.0"
+    },
+    "devDependencies" : {
+        "tap" : "~0.3.0",
+        "pushover" : "~1.0.3"
+    },
+    "scripts" : {
+        "test" : "tap test/*.js"
+    },
+    "repository" : {
+        "type" : "git",
+        "url" : "git://github.com/substack/github-push-receive.git"
+    },
+    "homepage" : "https://github.com/substack/github-push-receive",
+    "keywords" : [
+        "git",
+        "http",
+        "payload",
+        "github",
+        "push",
+        "receive"
+    ],
+    "author" : {
+        "name" : "James Halliday",
+        "email" : "mail@substack.net",
+        "url" : "http://substack.net"
+    },
+    "license" : "MIT"
+}
