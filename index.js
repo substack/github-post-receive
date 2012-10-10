@@ -33,14 +33,14 @@ module.exports = function (target, opts) {
         tr.on('failure', function (err) {
             res.statusCode = 500;
             res.end(String(err) + '\n');
+            rs.emit('failure', err);
         });
         
         tr.on('payload', function (payload) {
+            rs.emit('payload', payload);
+            
             clonePush(dir, target, payload, function (err) {
-                if (err) {
-                    res.statusCode = 500;
-                    res.end(String(err) + '\n');
-                }
+                if (err) tr.emit('failure', err);
                 else res.end('ok\n')
             });
         });
@@ -50,21 +50,33 @@ module.exports = function (target, opts) {
 };
 
 function clonePush (basedir, target, payload, cb) {
-    var dir = path.join(basedir, Math.random().slice(2));
-    var opts = { cwd : dir };
-    var c = run('git', [ 'clone', payload.repository.url ], opts);
-    var remote = target + '/'
-        + payload.url.replace(/^https?:\/\/github\.com\//, '')
-    ;
-    
-    c.on('error', cb);
-    
-    c.on('exit', function (code) {
-        if (code !== 0) return;
-        var p = run('git', [ 'push', remote ], opts);
-        p.on('error', cb);
-        p.on('exit', function (code) {
-            if (code === 0) cb();
+    var dir = path.join(basedir, Math.random().toString().slice(2));
+    mkdirp(dir, function (err) {
+        if (err) return cb(err);
+        var opts = { cwd : dir };
+        
+        var source = payload.repository.url.replace(/(?:\.git|)$/, '.git');
+        var remote = target + '/'
+            + source.replace(/^https?:\/\/github\.com\//, '')
+        ;
+        
+        var c = run('git', [ 'clone', source ], opts);
+        c.on('error', cb);
+        
+        c.on('exit', function (code) {
+            if (code !== 0) return;
+            opts.cwd += '/'+ path.basename(
+                payload.repository.url
+                    .replace(/^https?:\/\/github\.com\//, '')
+            );
+            
+            var args = [ 'push', remote, payload.ref.split('/')[2] ];
+            var p = run('git', args, opts);
+            
+            p.on('error', cb);
+            p.on('exit', function (code) {
+                if (code === 0) cb();
+            });
         });
     });
 }
