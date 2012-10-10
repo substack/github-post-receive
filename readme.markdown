@@ -54,6 +54,24 @@ When you push code to the github repo, the git target will get pushed to.
 
 # methods
 
+``` js
+var pushReceive = require('github-push-receive')
+```
+
+## pushReceive(target)
+
+Return a duplex [response-stream](https://github.com/substack/response-stream)
+that you can pipe http request objects into and optionally pipe into http
+response objects.
+
+The git payloads received as POSTS will be cloned and pushed to `target`.
+
 # install
 
+```
+npm install github-push-receive
+```
+
 # license
+
+MIT
