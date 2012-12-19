@@ -70,7 +70,7 @@ function clonePush (basedir, target, payload, cb) {
                     .replace(/^https?:\/\/github\.com\//, '')
             );
             
-            var args = [ 'push', remote, payload.ref.split('/')[2] ];
+            var args = [ 'push', '-f', remote, payload.ref.split('/')[2] ];
             var p = run('git', args, opts);
             
             p.on('error', cb);
