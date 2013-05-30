@@ -69,14 +69,26 @@ function clonePush (basedir, target, payload, cb) {
                 payload.repository.url
                     .replace(/^https?:\/\/github\.com\//, '')
             );
-            
-            var args = [ 'push', '-f', remote, payload.ref.split('/')[2] ];
+
+          var branch = payload.ref.split('/')[2]
+
+          var args = [ 'checkout', branch ];
+          var r = run('git', args, opts);
+          r.on('error', cb);
+
+          r.on('exit', function (code) {
+            if (code !== 0) return;
+
+            var args = [ 'push', '-f', remote,  branch];
+
             var p = run('git', args, opts);
             
             p.on('error', cb);
             p.on('exit', function (code) {
-                if (code === 0) cb();
+              if (code === 0) cb();
             });
+          });
         });
+
     });
 }
