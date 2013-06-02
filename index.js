@@ -24,6 +24,10 @@ module.exports = function (target, opts) {
         catch (err) {
             return this.emit('failure', err);
         }
+        if (!payload || typeof payload !== 'object') {
+            return this.emit('failure', 'malformed payload');
+        }
+        
         this.emit('payload', payload);
     }
     
@@ -54,6 +58,16 @@ function clonePush (basedir, target, payload, cb) {
     mkdirp(dir, function (err) {
         if (err) return cb(err);
         var opts = { cwd : dir };
+        
+        if (!payload.repository) {
+            return cb('missing payload.repository parameter');
+        }
+        if (typeof payload.repository.url !== 'string') {
+            return cb('missing or malformed payload repository url');
+        }
+        if (typeof payload.ref !== 'string') {
+            return cb('malformed or missing payload.ref');
+        }
         
         var source = payload.repository.url.replace(/(?:\.git|)$/, '.git');
         var remote = target + '/'
