@@ -1,6 +1,6 @@
 {
     "name" : "github-push-receive",
-    "version" : "0.1.1",
+    "version" : "0.1.2",
     "description" : "issue a `git push` in response to a github post-receive hook payload",
     "main" : "index.js",
     "bin" : {},
@@ -12,7 +12,7 @@
         "comandante" : "~0.0.1",
         "mkdirp" : "~0.3.4",
         "response-stream" : "~0.0.0",
-        "through" : "~2.7.0"
+        "through" : "~2.3.4"
     },
     "devDependencies" : {
         "tap" : "~0.4.0",
