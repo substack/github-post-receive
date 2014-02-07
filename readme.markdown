@@ -58,13 +58,16 @@ When you push code to the github repo, the git target will get pushed to.
 var pushReceive = require('github-push-receive')
 ```
 
-## pushReceive(target)
+## pushReceive(target, opts={})
 
 Return a duplex [response-stream](https://github.com/substack/response-stream)
 that you can pipe http request objects into and optionally pipe into http
 response objects.
 
 The git payloads received as POSTS will be cloned and pushed to `target`.
+
+`opts.payloadMap(payload, cb)` can be a function that takes a payload and
+transforms it asynchronously, calling `cb(payload)` with the result.
 
 # install
 
