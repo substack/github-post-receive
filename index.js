@@ -11,6 +11,7 @@ module.exports = function (target, opts) {
         (process.env.TEMPDIR || '/tmp/')
         + Math.random().toString(16).slice(2)
     );
+    var payloadMap = opts.payloadMap || function (x, cb) { cb(x) };
     
     var data = '';
     function write (buf) { data += buf }
@@ -27,8 +28,9 @@ module.exports = function (target, opts) {
         if (!payload || typeof payload !== 'object') {
             return this.emit('failure', 'malformed payload');
         }
-        
-        this.emit('payload', payload);
+        payloadMap(payload, function (x) {
+            tr.emit('payload', x);
+        });
     }
     
     var tr = through(write, end);
@@ -91,16 +93,14 @@ function clonePush (basedir, target, payload, cb) {
           r.on('error', cb);
 
           r.on('exit', function (code) {
-            if (code !== 0) return;
-
-            var args = [ 'push', '-f', remote,  branch];
-
-            var p = run('git', args, opts);
-            
-            p.on('error', cb);
-            p.on('exit', function (code) {
-              if (code === 0) cb();
-            });
+              if (code !== 0) return;
+              var args = [ 'push', '-f', remote,  branch];
+              var p = run('git', args, opts);
+              
+              p.on('error', cb);
+              p.on('exit', function (code) {
+                  if (code === 0) cb();
+              });
           });
         });
 
