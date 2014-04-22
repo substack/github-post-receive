@@ -1,6 +1,6 @@
 {
     "name" : "github-push-receive",
-    "version" : "0.2.0",
+    "version" : "0.2.1",
     "description" : "issue a `git push` in response to a github post-receive hook payload",
     "main" : "index.js",
     "bin" : {},
