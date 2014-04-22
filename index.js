@@ -73,7 +73,7 @@ function clonePush (basedir, target, payload, cb) {
         
         var source = payload.repository.url.replace(/(?:\.git|)$/, '.git');
         var remote = target + '/'
-            + source.replace(/^https?:\/\/github\.com\//, '')
+            + source.replace(/^https?:\/\/github\.com\//, '').replace(/#.*/, '')
         ;
         
         var c = run('git', [ 'clone', source ], opts);
@@ -85,24 +85,22 @@ function clonePush (basedir, target, payload, cb) {
                 payload.repository.url
                     .replace(/^https?:\/\/github\.com\//, '')
             );
-
-          var branch = payload.ref.split('/')[2]
-
-          var args = [ 'checkout', branch ];
-          var r = run('git', args, opts);
-          r.on('error', cb);
-
-          r.on('exit', function (code) {
-              if (code !== 0) return;
-              var args = [ 'push', '-f', remote,  branch];
-              var p = run('git', args, opts);
-              
-              p.on('error', cb);
-              p.on('exit', function (code) {
-                  if (code === 0) cb();
-              });
-          });
+            
+            var branch = payload.ref.split('/')[2]
+            var args = [ 'checkout', branch ];
+            var r = run('git', args, opts);
+            r.on('error', cb);
+            
+            r.on('exit', function (code) {
+                if (code !== 0) return;
+                var args = [ 'push', '-f', remote,  branch];
+                var p = run('git', args, opts);
+                
+                p.on('error', cb);
+                p.on('exit', function (code) {
+                    if (code === 0) cb();
+                });
+            });
         });
-
     });
 }
